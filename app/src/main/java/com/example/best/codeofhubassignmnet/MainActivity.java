@@ -1,7 +1,10 @@
 package com.example.best.codeofhubassignmnet;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
@@ -22,16 +25,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.example.best.codeofhubassignmnet.Commmon.Common;
+import com.example.best.codeofhubassignmnet.MyPhotesActivity.MyPhotoActivity;
+import com.example.best.codeofhubassignmnet.adapter.GalleryPhotesAdapter;
 import com.example.best.codeofhubassignmnet.adapter.PublicPhotesAdapter;
 import com.example.best.codeofhubassignmnet.map.MapsActivity;
 import com.example.best.codeofhubassignmnet.model.FlickerPublicPhotesResponse;
 import com.example.best.codeofhubassignmnet.model.Item;
+import com.example.best.codeofhubassignmnet.model.galleryResponse.GalleryDetail;
+import com.example.best.codeofhubassignmnet.model.modelMyPhotes.Photo;
 import com.example.best.codeofhubassignmnet.remote.IFlickerApi;
 import com.example.best.codeofhubassignmnet.volly.MySingleton;
 import com.flickr4java.flickr.Flickr;
@@ -68,6 +76,8 @@ import com.flickr4java.flickr.auth.Permission;
 import com.flickr4java.flickr.util.IOUtilities;
 import com.google.gson.JsonObject;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
@@ -87,6 +97,8 @@ public class MainActivity extends AppCompatActivity
     RecyclerView.LayoutManager layoutManager;
     SpotsDialog dialog;
     public SwipeRefreshLayout swipeRefreshLayout;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,141 +175,56 @@ public class MainActivity extends AppCompatActivity
         });
 
 
-//        if (Common.isConnectedToInternet(getApplicationContext())) {
-//            // load menu
-//            sendRequestPublicPhotesFlicker();
-//           // getToken();
-//
-//        } else {
-//
-//            Toast.makeText(MainActivity.this, "Please check your internet connection!!", Toast.LENGTH_SHORT).show();
-//            return;
-//
-//        }
+        if (Common.isConnectedToInternet(getApplicationContext())) {
+            // load menu
+            sendRequestPublicPhotesFlicker();
+
+        } else {
+
+            Toast.makeText(MainActivity.this, "Please check your internet connection!!", Toast.LENGTH_SHORT).show();
+            return;
+
+        }
 
 
-        test();
+
 
 
     }
 
 
-    public void test() {
 
-
-
-
-
-        Flickr flickr = new Flickr("79a5f137544068d61e0b889065f13bba", "e514bd64c354a159", new REST());
-        Flickr.debugStream = false;
-        AuthInterface authInterface = flickr.getAuthInterface();
-        Token token = authInterface.getRequestToken();
-
-
-
-        String url = authInterface.getAuthorizationUrl(token, Permission.WRITE);
-        Log.e("url",url);
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-
-         String newToken="878-249-843";
-
-//
-//        StringRequest postRequest = new StringRequest(Request.Method.GET, url,
-//                new com.android.volley.Response.Listener<String>() {
-//                    @Override
-//                    public void onResponse(String response) {
-//
-//                        dialog.dismiss();
-//                        // JsonObject jsonObject=new JsonObject()
-//                        Log.e("res",response);
-//
-//
-//                    }
-//                }, new com.android.volley.Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                dialog.dismiss();
-//
-//                Log.e("error",error.getMessage()+"");
-//                Toast.makeText(MainActivity.this,
-//                        "something went wrong", Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//
-//
-//        MySingleton.getInstance().addToReqQueue(postRequest);
-//
-
-
-
-
-
-//        String tokenKey = scanner.nextLine();
-//        scanner.close();
-//
-//        Token requestToken = authInterface.getAccessToken(token, new Verifier(tokenKey));
-//        System.out.println("Authentication success");
-//
-//        Auth auth = authInterface.checkToken(requestToken);
-//
-//        // This token can be used until the user revokes it.
-//        System.out.println("Token: " + requestToken.getToken());
-//        System.out.println("Secret: " + requestToken.getSecret());
-//        System.out.println("nsid: " + auth.getUser().getId());
-//        System.out.println("Realname: " + auth.getUser().getRealName());
-//        System.out.println("Username: " + auth.getUser().getUsername());
-//        System.out.println("Permission: " + auth.getPermission().getType());
-////
-
-//        WebView webView = (WebView) findViewById(R.id.webView1);
-//        WebSettings settings = webview.getSettings();
-//        settings.setJavaScriptEnabled(true);
-//        webView.loadUrl(url);
-
-       // startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-
-        //dialog.show();
-//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-//        String url ="http://www.flickr.com/services/oauth/request_token"+"?oauth_nonce=89601180"+
-//                "&oauth_consumer_key=79a5f137544068d61e0b889065f13bba"+
-//                "&oauth_version=1.0";
-
-
-        //"http://api.flickr.com/services/rest/?method=flickr.auth.getFrob&api_key=79a5f137544068d61e0b889065f13bba&api_sig=e514bd64c354a159"
-
-
-
-
-    }
 
     private void sendRequestPublicPhotesFlicker() {
-//        dialog.show();
-//
-//        iFlickerApi.getFlikerPublicPhotes().enqueue(new Callback<FlickerPublicPhotesResponse>() {
-//            @Override
-//            public void onResponse(Call<FlickerPublicPhotesResponse> call, Response<FlickerPublicPhotesResponse> response) {
-//
-//                FlickerPublicPhotesResponse flickerPublicPhotesResponse = response.body();
-//                List<Item> items = flickerPublicPhotesResponse.getItems();
-//
-//                dialog.dismiss();
-//
-//                PublicPhotesAdapter adapter = new PublicPhotesAdapter(MainActivity.this, items);
-//                recyclerView_publicPhotes.setAdapter(adapter);
-//
-//
-//            }
-//
-//            @Override
-//            public void onFailure(Call<FlickerPublicPhotesResponse> call, Throwable t) {
-//
-//                dialog.dismiss();
-//
-//                Log.e("error", t.toString());
-//            }
-//        });
+        dialog.show();
+
+        iFlickerApi.getFlikerPublicPhotes().enqueue(new Callback<FlickerPublicPhotesResponse>() {
+            @Override
+            public void onResponse(Call<FlickerPublicPhotesResponse> call, Response<FlickerPublicPhotesResponse> response) {
+
+                FlickerPublicPhotesResponse flickerPublicPhotesResponse = response.body();
+                List<Item> items = flickerPublicPhotesResponse.getItems();
+
+                dialog.dismiss();
+
+                PublicPhotesAdapter adapter = new PublicPhotesAdapter(MainActivity.this, items);
+                recyclerView_publicPhotes.setAdapter(adapter);
+
+
+            }
+
+            @Override
+            public void onFailure(Call<FlickerPublicPhotesResponse> call, Throwable t) {
+
+                dialog.dismiss();
+
+                Log.e("error", t.toString());
+            }
+        });
 
     }
+
+
 
     @Override
     public void onBackPressed() {
@@ -348,8 +275,10 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_my_photes) {
 
+            startActivity(new Intent(MainActivity.this, MyPhotoActivity.class));
+
         } else if (id == R.id.nav_map) {
-            startActivity(new Intent(MainActivity.this,MapsActivity.class));
+            startActivity(new Intent(MainActivity.this, MapsActivity.class));
 
         } else if (id == R.id.nav_my_profile) {
 
@@ -359,4 +288,12 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+
+
 }
+
+
+
+
+

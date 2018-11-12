@@ -38,6 +38,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     Location mLastLocation;
     Marker mCurrLocationMarker;
     FusedLocationProviderClient mFusedLocationClient;
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,12 +49,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         getSupportActionBar().setTitle("Map");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-
-
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
         mapFrag = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFrag.getMapAsync(this);
     }
@@ -71,7 +69,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
         mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(500); // two minute interval
         mLocationRequest.setFastestInterval(300);
@@ -102,7 +99,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (mCurrLocationMarker != null) {
                     mCurrLocationMarker.remove();
                 }
-
                 //Place current location marker
                 LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 MarkerOptions markerOptions = new MarkerOptions();
@@ -110,7 +106,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 markerOptions.title("Current Position");
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
                 mCurrLocationMarker = mGoogleMap.addMarker(markerOptions);
-
                 //move map camera
                 mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
             }
@@ -121,16 +116,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     };
 
 
-    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
-
     private void checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
-
             // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                     android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-
                 // Show an explanation to the user *asynchronously* -- don't block
                 // this thread waiting for the user's response! After the user
                 // sees the explanation, try again to request the permission.
@@ -148,8 +139,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         })
                         .create()
                         .show();
-
-
             } else {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(this,
@@ -173,13 +162,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     if (ContextCompat.checkSelfPermission(this,
                             android.Manifest.permission.ACCESS_FINE_LOCATION)
                             == PackageManager.PERMISSION_GRANTED) {
-
                         mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
                         mGoogleMap.setMyLocationEnabled(true);
                     }
 
                 } else {
-
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                     Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
