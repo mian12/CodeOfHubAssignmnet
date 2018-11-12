@@ -14,7 +14,8 @@ public class FlickerPublicPhotesResponse {
     public FlickerPublicPhotesResponse() {
     }
 
-    public FlickerPublicPhotesResponse(String title, String link, String description, String modified, String generator, List<Item> items) {
+    public FlickerPublicPhotesResponse(String title, String link, String description, String modified,
+                                       String generator, List<Item> items) {
         this.title = title;
         this.link = link;
         this.description = description;

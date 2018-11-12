@@ -195,7 +195,7 @@ public class MainActivity extends AppCompatActivity
 
 
 
-    private void sendRequestPublicPhotesFlicker() {
+    private   void  sendRequestPublicPhotesFlicker() {
         dialog.show();
 
         iFlickerApi.getFlikerPublicPhotes().enqueue(new Callback<FlickerPublicPhotesResponse>() {
