@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.example.best.codeofhubassignmnet.FullPhoto.FullMyPhotoActivity;
 import com.example.best.codeofhubassignmnet.FullPhoto.SeePhotoActivity;
 import com.example.best.codeofhubassignmnet.R;
 import com.example.best.codeofhubassignmnet.model.Item;
@@ -33,7 +34,8 @@ public class GalleryPhotesAdapter extends RecyclerView.Adapter<GalleryPhotesAdap
     @NonNull
     @Override
     public GalleryPhotesAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        return new GalleryPhotesAdapter.MyViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.row_public_photes, viewGroup, false));
+        return new GalleryPhotesAdapter.MyViewHolder(LayoutInflater.from(viewGroup.getContext())
+                .inflate(R.layout.row_public_photes, viewGroup, false));
     }
 
     @Override
@@ -47,16 +49,14 @@ public class GalleryPhotesAdapter extends RecyclerView.Adapter<GalleryPhotesAdap
                     .centerCrop()
                     .into(myViewHolder.imageViewPublicPhoto);
 
-
             myViewHolder.row.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//
-//                    //  Toast.makeText(context, ""+teacherName, Toast.LENGTH_SHORT).show();
-//                    Intent intent = new Intent(context, SeePhotoActivity.class);
-//                    intent.putExtra("fullImageLink", items.get(temp).getMedia().getM());
-//
-//                    context.startActivity(intent);
+
+                    Intent intent = new Intent(context, FullMyPhotoActivity.class);
+                    intent.putExtra("fullImageLink", url.get(temp));
+
+                    context.startActivity(intent);
                 }
             });
 

@@ -1,10 +1,7 @@
 package com.example.best.codeofhubassignmnet;
 
-import android.app.Dialog;
+
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
@@ -23,70 +20,25 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.example.best.codeofhubassignmnet.Commmon.Common;
 import com.example.best.codeofhubassignmnet.MyPhotesActivity.MyPhotoActivity;
-import com.example.best.codeofhubassignmnet.adapter.GalleryPhotesAdapter;
+import com.example.best.codeofhubassignmnet.MyProfile.MyProfileActivity;
 import com.example.best.codeofhubassignmnet.adapter.PublicPhotesAdapter;
 import com.example.best.codeofhubassignmnet.map.MapsActivity;
 import com.example.best.codeofhubassignmnet.model.FlickerPublicPhotesResponse;
 import com.example.best.codeofhubassignmnet.model.Item;
-import com.example.best.codeofhubassignmnet.model.galleryResponse.GalleryDetail;
-import com.example.best.codeofhubassignmnet.model.modelMyPhotes.Photo;
 import com.example.best.codeofhubassignmnet.remote.IFlickerApi;
-import com.example.best.codeofhubassignmnet.volly.MySingleton;
-import com.flickr4java.flickr.Flickr;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import dmax.dialog.SpotsDialog;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-
-import com.flickr4java.flickr.Flickr;
-import com.flickr4java.flickr.FlickrException;
-import com.flickr4java.flickr.REST;
-import com.flickr4java.flickr.RequestContext;
-import com.flickr4java.flickr.activity.ActivityInterface;
-import com.flickr4java.flickr.activity.Event;
-
-import com.flickr4java.flickr.activity.ItemList;
-import com.flickr4java.flickr.auth.Auth;
-import com.flickr4java.flickr.auth.AuthInterface;
-import com.flickr4java.flickr.auth.Permission;
-import com.flickr4java.flickr.util.IOUtilities;
-import com.google.gson.JsonObject;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.scribe.model.Token;
-import org.scribe.model.Verifier;
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Properties;
 
 
 public class MainActivity extends AppCompatActivity
@@ -99,7 +51,6 @@ public class MainActivity extends AppCompatActivity
     public SwipeRefreshLayout swipeRefreshLayout;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,18 +59,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
         StrictMode.setThreadPolicy(policy);
-
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -131,34 +71,43 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
+        // initilize dialog indicator
         dialog = new SpotsDialog(MainActivity.this);
         dialog.setCancelable(false);
 
+        // initialize recylerview
         recyclerView_publicPhotes = findViewById(R.id.recyclerview_publicPhotes);
-        recyclerView_publicPhotes.setLayoutManager(new LinearLayoutManager(this));
+
+        //setting the  gridlayout for recyclerview
         layoutManager = new GridLayoutManager(this, 2);
+
         recyclerView_publicPhotes.setLayoutManager(layoutManager);
 
-        // public photes api call initalization
+        // set animation on recyclerview
 
+        LayoutAnimationController controller = AnimationUtils.loadLayoutAnimation(recyclerView_publicPhotes.getContext(),R.anim.layout_fall_down);
+
+        recyclerView_publicPhotes.setLayoutAnimation(controller);
+
+        // public photes api call initalization
         iFlickerApi = Common.getPublicPhotes();
 
 
+        // pull to refresh initialize view
         swipeRefreshLayout = findViewById(R.id.swipe_to_refresh);
         swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_dark,
                 android.R.color.holo_green_dark,
                 android.R.color.holo_orange_dark,
                 android.R.color.holo_red_dark
         );
-
-
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
 
 
+                // check if internet is connected or not
                 if (Common.isConnectedToInternet(getApplicationContext())) {
-                    // load menu
+                    // call for public api
                     sendRequestPublicPhotesFlicker();
                     swipeRefreshLayout.setRefreshing(false);
 
@@ -174,9 +123,9 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-
+        // check if internet is connected or not
         if (Common.isConnectedToInternet(getApplicationContext())) {
-            // load menu
+            // call for public api
             sendRequestPublicPhotesFlicker();
 
         } else {
@@ -187,28 +136,28 @@ public class MainActivity extends AppCompatActivity
         }
 
 
-
-
-
     }
 
 
-
-
-    private   void  sendRequestPublicPhotesFlicker() {
+    private void sendRequestPublicPhotesFlicker() {
         dialog.show();
 
+        // retrofit call request for public photos
         iFlickerApi.getFlikerPublicPhotes().enqueue(new Callback<FlickerPublicPhotesResponse>() {
             @Override
             public void onResponse(Call<FlickerPublicPhotesResponse> call, Response<FlickerPublicPhotesResponse> response) {
 
+                // response of public photoes api
                 FlickerPublicPhotesResponse flickerPublicPhotesResponse = response.body();
+                //assign  public photes to list
                 List<Item> items = flickerPublicPhotesResponse.getItems();
 
                 dialog.dismiss();
 
+                //set adapter for public photos
                 PublicPhotesAdapter adapter = new PublicPhotesAdapter(MainActivity.this, items);
                 recyclerView_publicPhotes.setAdapter(adapter);
+                recyclerView_publicPhotes.scheduleLayoutAnimation();
 
 
             }
@@ -223,7 +172,6 @@ public class MainActivity extends AppCompatActivity
         });
 
     }
-
 
 
     @Override
@@ -281,6 +229,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(new Intent(MainActivity.this, MapsActivity.class));
 
         } else if (id == R.id.nav_my_profile) {
+            startActivity(new Intent(MainActivity.this, MyProfileActivity.class));
 
         }
 
@@ -288,7 +237,6 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
 
 
 }

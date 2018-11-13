@@ -12,6 +12,8 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
@@ -21,6 +23,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.example.best.codeofhubassignmnet.Commmon.Common;
 import com.example.best.codeofhubassignmnet.MainActivity;
+
 import com.example.best.codeofhubassignmnet.R;
 import com.example.best.codeofhubassignmnet.adapter.GalleryPhotesAdapter;
 import com.example.best.codeofhubassignmnet.model.galleryResponse.GalleryDetail;
@@ -60,10 +63,7 @@ public class MyPhotoActivity extends AppCompatActivity {
     String result = null;
 
     ArrayList<GalleryDetail> galleyDetailArrayList = new ArrayList<>();
-    List<String> urlList=null;
-
-
-
+    List<String> urlList = null;
 
 
     @Override
@@ -72,7 +72,6 @@ public class MyPhotoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_my_photo);
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
         StrictMode.setThreadPolicy(policy);
 
 
@@ -86,31 +85,35 @@ public class MyPhotoActivity extends AppCompatActivity {
 
 
         recyclerView_myPhotes = findViewById(R.id.recyclerview_MyPhotes);
-        recyclerView_myPhotes.setLayoutManager(new LinearLayoutManager(this));
+
         layoutManager = new GridLayoutManager(this, 2);
         recyclerView_myPhotes.setLayoutManager(layoutManager);
+        // set animation on recyclerview
+        LayoutAnimationController controller = AnimationUtils.loadLayoutAnimation(recyclerView_myPhotes.getContext(),R.anim.layout_fall_down);
+
+        recyclerView_myPhotes.setLayoutAnimation(controller);
 
 
+
+        // pull to refresh declare
         swipeRefreshLayout = findViewById(R.id.swipe_to_refresh);
         swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_dark,
                 android.R.color.holo_green_dark,
                 android.R.color.holo_orange_dark,
                 android.R.color.holo_red_dark
         );
-
-
+        //listener of pull to refresh
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
 
-
+                // checking net connected or not
                 if (Common.isConnectedToInternet(getApplicationContext())) {
-                    // load menu
+                    //called AsyncTask backgroud thread  to request token
                     new GetTokenFlicker().execute();
                     swipeRefreshLayout.setRefreshing(false);
 
                 } else {
-
                     swipeRefreshLayout.setRefreshing(false);
                     Toast.makeText(MyPhotoActivity.this, "Please check your internet connection!!", Toast.LENGTH_SHORT).show();
                     return;
@@ -122,34 +125,24 @@ public class MyPhotoActivity extends AppCompatActivity {
         });
 
 
+        // checking net connected or not
         if (Common.isConnectedToInternet(getApplicationContext())) {
-            // load menu
+            //called AsyncTask backgroud thread  to request token
             new GetTokenFlicker().execute();
 
         } else {
-
             Toast.makeText(MyPhotoActivity.this, "Please check your internet connection!!", Toast.LENGTH_SHORT).show();
             return;
 
         }
 
 
-
-
-
-
-
-
     }
-
-
 
 
     public class GetTokenFlicker extends AsyncTask<String, String, String> {
 
         public final String TAG = GetTokenFlicker.class.getSimpleName();
-        String url;
-        int count = 0;
         Dialog auth_dialog = null;
 
         @Override
@@ -160,6 +153,7 @@ public class MyPhotoActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... params) {
 
+            // getting flicker app key and secret key by registering the user on flicker
             String flickrKey = "79a5f137544068d61e0b889065f13bba";
             String flickrSecret = "e514bd64c354a159";
 
@@ -168,8 +162,10 @@ public class MyPhotoActivity extends AppCompatActivity {
 
                 Flickr.debugRequest = false;
                 Flickr.debugStream = false;
+                // define object of flicker with paramters  for rest call
                 flickr = new Flickr(flickrKey, flickrSecret, new REST());
                 authInterface = flickr.getAuthInterface();
+                // this is callback method w for flicker  for login yahoo account
                 token = authInterface.getRequestToken("your calback url");
                 result = authInterface.getAuthorizationUrl(token, Permission.WRITE);
 
@@ -189,9 +185,10 @@ public class MyPhotoActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             if (result != null && result.length() > 0) {
                 Log.e("f1Post", "Follow this URL to authorise yourself on Flickr");
-                //L(result);
+                //now delcare dalert dialog for yahoo page
                 auth_dialog = new Dialog(MyPhotoActivity.this);
                 auth_dialog.setContentView(R.layout.auth_dialog);
+                //intialize webview to load url  and getting new generated token
                 final WebView web = (WebView) auth_dialog.findViewById(R.id.webv);
                 web.getSettings().setJavaScriptEnabled(true);
 
@@ -210,6 +207,7 @@ public class MyPhotoActivity extends AppCompatActivity {
                                     String oauth_verifier = uri.getQueryParameter("oauth_verifier");
                                     String oauth_token = uri.getQueryParameter("oauth_token");
 
+                                    // to verifiy the new generated token on flicker for create  async task backend thread
                                     new VerifiyTokenFlicker().execute(oauth_token, oauth_verifier);
                                 }
                             }
@@ -248,10 +246,7 @@ public class MyPhotoActivity extends AppCompatActivity {
                 Verifier verifier = new Verifier(oauth_verifier[1]);
                 Token accessToken = authInterface.getAccessToken(token, verifier);
                 Log.e("sucsess", "Authentication success");
-                ;
-
-
-                authInterface = flickr.getAuthInterface();
+                 authInterface = flickr.getAuthInterface();
                 Token requestToken = authInterface.getRequestToken();
                 Log.e("auth tocen", "auth tocen and secret: " + requestToken.getToken() + " , " + requestToken.getSecret());
 
@@ -268,6 +263,11 @@ public class MyPhotoActivity extends AppCompatActivity {
                 Log.e("", "checking for token" + accessToken);
                 auth = authInterface.checkToken(accessToken);
 
+                //save the current user login details
+                Common.userId=auth.getUser().getId();
+                Common.realName=auth.getUser().getRealName();
+                Common.userName=auth.getUser().getUsername();
+
 
                 // This token can be used until the user revokes it.
                 Log.e("0", "Token: " + accessToken.getToken());
@@ -277,9 +277,14 @@ public class MyPhotoActivity extends AppCompatActivity {
                 Log.e("4", "Username: " + auth.getUser().getUsername());
                 Log.e("5", "Permission: " + auth.getPermission().getType());
 
-                String galleryApiUrl = "https://api.flickr.com/services/rest/?method=flickr.galleries.getList&api_key=ee2df04d262e20d0d963537cc532bfa7&user_id=66857167%40N04&format=json&nojsoncallback=1&auth_token=72157673402091647-de976259a4038b58&api_sig=f72609a2950af8268d0e478f767e1f5e";
+                //  url for getting gallery ids
+                String galleryApiUrl = "https://api.flickr.com/services/rest/?method=flickr.galleries.getList&" +
+                        "api_key=073238bec9052c2f344dcbe2908fa103&user_id=66857167%40N04&format=json&nojsoncallback=1" +
+                        "&auth_token=72157700283359252-6dbcc9569868b461&api_sig=6f4358a0768f693efe0951532863a90f";
 
-                gettingGallery(galleryApiUrl, auth);
+
+                //backend call for getting gallery id
+                gettingGallery(galleryApiUrl);
 
 
             } catch (FlickrException e) {
@@ -299,7 +304,7 @@ public class MyPhotoActivity extends AppCompatActivity {
     }
 
 
-    public void gettingGallery(String getPhotesUrl, final Auth authToken) {
+    public void gettingGallery(String getPhotesUrl) {
 
         StringRequest postRequest = new StringRequest(Request.Method.GET, getPhotesUrl,
                 new com.android.volley.Response.Listener<String>() {
@@ -310,6 +315,7 @@ public class MyPhotoActivity extends AppCompatActivity {
 
                         try {
 
+                            // parse the json response
                             JSONObject jsonObject = new JSONObject(response);
                             JSONObject galleyJson = jsonObject.getJSONObject("galleries");
                             String userId = galleyJson.getString("user_id");
@@ -331,15 +337,15 @@ public class MyPhotoActivity extends AppCompatActivity {
 
                             }
 
-//                            Key: 79a5f137544068d61e0b889065f13bba
-//                            Secret: e514bd64c354a159
+                            //id of gallery
+                            String galleryId = galleyDetailArrayList.get(0).getGalleryId();
 
-                            String galleryId = galleyDetailArrayList.get(1).getGalleryId();
-                            //  String ph="https://api.flickr.com/services/rest/?method=flickr.galleries.getPhotos&api_key=ee2df04d262e20d0d963537cc532bfa7&gallery_id="+galleryId+"&format=json&nojsoncallback=1&auth_token="+authToken.getToken()+"&api_sig="+authToken.getTokenSecret();
-
-
+                            //url for getting photoes from specific gallery
                             String galleryPhotesApi = "https://api.flickr.com/services/rest/?method=flickr.galleries.getPhotos&api_key=79a5f137544068d61e0b889065f13bba&gallery_id=" + galleryId + "&format=json&nojsoncallback=1";
 
+
+
+                            //now call the backend volley liberay to get photes
                             getGallleryPhotes(galleryPhotesApi);
 
                         } catch (JSONException e) {
@@ -369,10 +375,10 @@ public class MyPhotoActivity extends AppCompatActivity {
     {
 
 
-
         dialog.show();
 
-        urlList=new ArrayList<>();
+        //initalize the arraylist for storing urls of gallery photos
+        urlList = new ArrayList<>();
 
         StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 new com.android.volley.Response.Listener<String>() {
@@ -382,9 +388,6 @@ public class MyPhotoActivity extends AppCompatActivity {
                         dialog.dismiss();
 
                         Log.e("res", response);
-
-
-                        // https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}.jpg
                         try {
 
                             JSONObject jsonObject = new JSONObject(response);
@@ -401,19 +404,21 @@ public class MyPhotoActivity extends AppCompatActivity {
                                 String id = innerJson.getString("id");
                                 String server = innerJson.getString("server");
                                 String secret = innerJson.getString("secret");
+
                                 // https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}.jpg
 
+                                //now make the url for get image
                                 String customUrl = "https://farm" + farmId + ".staticflickr.com/" + server + "/" + id + "_" + secret + ".jpg";
                                 Log.e("urlinal", customUrl);
 
-
-
+                                // add  all photos url into arraylist for adapter purpose
                                 urlList.add(customUrl);
 
 
                             }
 
 
+                            //declare object of  adapter and assign newly created arra
                             GalleryPhotesAdapter adapter = new GalleryPhotesAdapter(MyPhotoActivity.this, urlList);
                             recyclerView_myPhotes.setAdapter(adapter);
 //

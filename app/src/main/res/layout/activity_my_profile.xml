@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#4a0072"
+
+    tools:context=".MyProfile.MyProfileActivity">
+
+
+    <EditText
+        android:id="@+id/userName_edittext"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginRight="32dp"
+        android:background="@drawable/edit_text_background_rounded"
+        android:ems="10"
+        android:hint="User Name"
+        android:paddingLeft="15dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/user_imageView" />
+
+    <EditText
+        android:id="@+id/realName"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/edit_text_background_rounded"
+        android:ems="10"
+        android:hint="Real Name"
+        android:paddingLeft="15dp"
+        app:layout_constraintEnd_toEndOf="@+id/userName_edittext"
+        app:layout_constraintStart_toStartOf="@+id/userName_edittext"
+        app:layout_constraintTop_toBottomOf="@+id/userName_edittext" />
+
+    <EditText
+        android:id="@+id/userId"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/edit_text_background_rounded"
+        android:ems="10"
+        android:hint="userId"
+        android:paddingLeft="15dp"
+        app:layout_constraintEnd_toEndOf="@+id/realName"
+        app:layout_constraintStart_toStartOf="@+id/realName"
+        app:layout_constraintTop_toBottomOf="@+id/realName" />
+
+    <Button
+        android:id="@+id/logout"
+        android:layout_width="234dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="8dp"
+        android:background="@android:color/holo_purple"
+        android:text="Log Out"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="@+id/userId"
+        app:layout_constraintStart_toStartOf="@+id/userId"
+        app:layout_constraintTop_toBottomOf="@+id/userId" />
+
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/user_imageView"
+        android:layout_width="0dp"
+        android:layout_height="150dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="44dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/ic_launcher_background"
+        app:civ_border_width="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</android.support.constraint.ConstraintLayout>

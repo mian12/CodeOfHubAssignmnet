@@ -8,9 +8,11 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
 
+public class MySingleton extends Application {
 
-  public  class MySingleton extends Application {
-
+    // Singeltion class for volley networking liberary
+    //create instance only one time and reuse it again this object without creating new
+    //one everytime
 
     private RequestQueue mRequestQueue;
     private static MySingleton mInstance;
@@ -23,7 +25,6 @@ import com.android.volley.toolbox.Volley;
         mInstance = this;
         getReqQueue();
     }
-
 
 
     public static synchronized MySingleton getInstance() {

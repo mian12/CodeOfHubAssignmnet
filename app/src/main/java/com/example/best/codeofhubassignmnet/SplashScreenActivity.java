@@ -32,17 +32,19 @@ public class SplashScreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
-
+        // wait for 1 second and then move for next activity
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
 
-                startActivity(new Intent(SplashScreenActivity.this,MainActivity.class));
+                // for showing new activity
+                startActivity(new Intent(SplashScreenActivity.this, MainActivity.class));
+                // to remove from stack
                 finish();
 
 
             }
-        }, 1500);
+        }, 1000);
     }
 
 
