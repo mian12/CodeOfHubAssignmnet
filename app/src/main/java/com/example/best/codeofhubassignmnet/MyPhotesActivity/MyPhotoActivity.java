@@ -278,9 +278,10 @@ public class MyPhotoActivity extends AppCompatActivity {
                 Log.e("5", "Permission: " + auth.getPermission().getType());
 
                 //  url for getting gallery ids
+
                 String galleryApiUrl = "https://api.flickr.com/services/rest/?method=flickr.galleries.getList&" +
-                        "api_key=073238bec9052c2f344dcbe2908fa103&user_id=66857167%40N04&format=json&nojsoncallback=1" +
-                        "&auth_token=72157700283359252-6dbcc9569868b461&api_sig=6f4358a0768f693efe0951532863a90f";
+                        "api_key=f04007aaa6ac8cbbd574ec1339296cbc&user_id=66857167%40N04&format=json&nojsoncallback=1&" +
+                        "auth_token=72157703488891294-f6cbd2b121030e22&api_sig=3daa3b8537ef8ad86616ff5c7a35a293";
 
 
                 //backend call for getting gallery id
